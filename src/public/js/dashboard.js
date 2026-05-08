@@ -1,341 +1,40 @@
-const btnNewUser = document.getElementById("btnNewUser")
-const btnLogout = document.getElementById("btnLogout")
 const spanUser = document.getElementById("user-display")
-const tableBody = document.getElementById("usuariosTableBody")
-const formUser = document.getElementById("formUser")
-const alertContainer = document.getElementById("alert-container")
-const alertApi = document.getElementById("alert-api")
-const userTable = document.querySelectorAll(".user-table")
-const inputSearch = document.getElementById("userSearch")
-
-const modalUser= document.getElementById("modalUser")
-const modalUserBS = new bootstrap.Modal(modalUser)
-btnNewUser.onclick = () =>{
-    modalUserBS.show()
-}
-
-const modalDelete = document.getElementById("modalDelete")
-const modalDeleteBS = new bootstrap.Modal(modalDelete)
-const btnDeleteModal = modalDelete.querySelector("#btnModalDelete")
-
-const modalDetail = document.getElementById("modalDetail")
-const modalDetailBS = new bootstrap.Modal(modalDetail)
-
-let editMode = false
-let currentUser = 0
-
-const loadUsers = async () => {
-
-    try {
-
-        checkSession()
-        loadStats()
-        const response = await fetch('/users/all')
-        if (response.status === 401) {
-            window.location.href = '/index.html'
-            return
-        }
-
-        const users = await response.json()
-        loadTable(users)
-
-    } catch (error) {
-        showToast(error || "Error al cargar lista de usuarios", "error")
-    }
-}
-
-document.addEventListener('DOMContentLoaded', loadUsers)
+const btnLogout = document.getElementById("btnLogout")
+const navUsers = document.getElementById("nav-users")
+const navRoles = document.getElementById("nav-roles")
+const viewUsers = document.getElementById("view-users")
+const viewRoles = document.getElementById("view-roles")
 
 
+const switchView = (view) => {
 
-formUser.onsubmit = async (e) =>{
-
-    e.preventDefault()
-    checkSession()
-
-    const name = formUser.querySelector("#userName").value.trim()
-    const dni = formUser.querySelector("#userDni").value.trim()
-    const email = formUser.querySelector("#userEmail").value.trim()
-    const rol = formUser.querySelector("#userRol").value.trim()
-    const date = formUser.querySelector("#userBirth").value.trim()
-    const adress = formUser.querySelector("#userAddress").value.trim()
-    const cp = formUser.querySelector("#userZip").value.trim()
-    const pass = formUser.querySelector("#userPassword").value.trim()
-    const confirmPass = formUser.querySelector("#confirmPassword").value.trim()
-    const obs = formUser.querySelector("#userObs").value.trim()
-    const active = formUser.querySelector("#userStatus").checked
-
-
-    if(!name || !dni || !email || !rol ){
-        showToast("Debe completar los campos requeridos.", "error")
-        return
-    }
-
-    if (!editMode && !pass) {
-        showToast("Debe completar los campos requeridos.", "error")
-        return
-    }
-
-    if(!editMode && pass.length < 8){
-        showToast("La contraseña debe tener al menos 8 caracteres.", "error")
-        return
-    }
-
-    if(pass != confirmPass){
-        showToast("Las contraseñas deben coincidir.", "error")
-        return
-    }
-
-    const url = editMode ? `/users/update/${currentUser}` : '/users/new'
-    const method = editMode ? 'PUT' : 'POST'
-
-    try {
-        const response = await fetch(url, {
-            method: method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, dni, email, rol, date, adress, cp, pass, confirmPass, obs, active})
-        })
-
-        const data = await response.json()
-
-        if (response.ok) {
-
-            modalUserBS.hide()
-            loadUsers()
-            formUser.reset()
-            showToast(editMode ? "Usuario actualizado correctamente" : "Usuario creado correctamente")
-            editMode = false
-
-        } else {
-            showToast(data.error || "Error al crear usuario", "error")
-        }
-
-    } catch (error) {
-        console.error('Error:', error)
-    }
-
-
-}
-
-inputSearch.oninput = async ()=>{
-
-    const filter = userSearch.value.trim()
+    loadStats()
     
-    if (filter == "") {
+    if (view === 'users') {
+        viewUsers.classList.remove('d-none')
+        viewRoles.classList.add('d-none')
+        navUsers.classList.add('active')
+        navRoles.classList.remove('active')
         loadUsers()
-        return
-    }
 
-    try {
-        const response = await fetch(`/users/search?filter=${encodeURIComponent(filter)}`)
-        const users = await response.json()
-
-        if (response.ok) {
-            loadTable(users)
-        }
-
-    } catch (error) {
-        console.error("Error en el buscador:", error)
-    }
-
-}
-
-
-
-window.detailUser = async (id) => {
-
-    try {
-        const response = await fetch(`/users/id/${id}`)
-        const user = await response.json()
-
-        if (response.ok) {
-
-            document.getElementById('detailName').textContent = user.nombre
-            document.getElementById('detailDni').textContent = user.dni 
-            document.getElementById('detailBirth').textContent = user.fecha_nacimiento ? new Date(user.fecha_nacimiento).toLocaleDateString() : "No registrada"
-            document.getElementById('detailEmail').textContent = user.email
-            document.getElementById('detailRol').textContent = user.rol_nombre
-            document.getElementById('detailStatus').textContent = user.activo === 1 ? 'Activo' : 'Inactivo'
-            const domicilio = user.domicilio || "No registrado"
-            const cp = user.codigo_postal || "No registrado"
-            document.getElementById('detailLocation').textContent = `${domicilio} - CP: ${cp}`
-            document.getElementById('detailObs').textContent = user.observacion || "Sin notas"
-            modalDetailBS.show()
-        }
-
-    } catch (error) {
-        console.error("Error al obtener detalle de usuario:", error)
-        showToast("Error al cargar la información del usuario", "error")
+    } else if (view === 'roles') {
+        viewUsers.classList.add('d-none')
+        viewRoles.classList.remove('d-none')
+        navUsers.classList.remove('active')
+        navRoles.classList.add('active')
+        loadRoles()
     }
 }
 
-window.editUser = async (id) => {
 
-    editMode = true
-    currentUser = id
-
-    try {
-        const response = await fetch(`/users/id/${id}`)
-        const user = await response.json()
-
-        if (response.ok) {
-
-            formUser.querySelector("#userName").value = user.nombre
-            formUser.querySelector("#userDni").value = user.dni
-            formUser.querySelector("#userEmail").value = user.email
-            formUser.querySelector("#userRol").value = user.rol_id
-            formUser.querySelector("#userBirth").value = user.fecha_nacimiento ? user.fecha_nacimiento.split('T')[0] : ''
-            formUser.querySelector("#userAddress").value = user.domicilio || ""
-            formUser.querySelector("#userZip").value = user.codigo_postal || ""
-            formUser.querySelector("#userObs").value = user.observacion || ""
-            formUser.querySelector("#userStatus").checked = user.activo === 1
-
-            formUser.querySelector("#userPassword").required = false
-            formUser.querySelector("#confirmPassword").required = false
-            formUser.querySelector("#userPassword").value = ""
-            formUser.querySelector("#confirmPassword").value = ""
-
-            modalUser.querySelector(".modal-title").innerText = "Editar Usuario"
-            
-            modalUserBS.show()
-        }
-
-    } catch (error) {
-        showToast("Error al cargar datos del usuario", "error")
-    }
-} 
-
-window.deleteUser = async (id) => {
-
-    const currentUserData = await checkSession()
-    if (currentUserData && currentUserData.id == id) {
-        showToast("No se puede eliminar mientras el usuario este logeado", "error")
-        return
-    }
-
-    modalDeleteBS.show()
-    
-    btnDeleteModal.onclick = async () =>{
-
-        try {
-            const response = await fetch(`/users/delete/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-
-            const data = await response.json()
-
-            if (response.ok) {
-
-                modalDeleteBS.hide()                
-                loadUsers()
-                showToast("Usuario eliminado correctamente")
-                
-            } else {
-                showToast(data.error || "Error al eliminar usuario", "error")
-            }
-
-        } catch (error) {
-            showToast(data.error || "Error al eliminar usuario", "error")
-        }
-    }
+navUsers.onclick = () => {
+    switchView('users')
 }
 
-btnLogout.onclick = async () =>{
-
-    try {
-        const response = await fetch('/users/logout', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
-        })
-
-        if (response.ok) {
-            window.location.href = '/index.html?logout=success'
-        } else {
-            alert("Error al cerrar sesion")
-        }
-
-    } catch (error) {
-        console.error("Error en logout:", error)
-    }
-} 
-
-const loadTable = (users) => {
-
-    tableBody.innerHTML = ''
-
-    if (users.length == 0) {
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="6" class="text-center text-muted">No se encontraron resultados</td>
-            </tr>`
-        return
-    }
-
-    users.forEach(user => {
-        tableBody.innerHTML += `
-            <tr class="user-table" onclick="detailUser(${user.id})">
-                <td>${user.nombre}</td>
-                <td>${user.email}</td>
-                <td>${user.dni}</td>
-                <td>
-                    <span class="badge bg-secondary">
-                        ${user.rol_nombre}
-                    </span>
-                </td>
-                <td>
-                    <span class="badge ${user.activo ? 'bg-success' : 'bg-secondary'}">
-                        ${user.activo ? 'Activo' : 'Inactivo'}
-                    </span>
-                </td>
-                <td class="text-end">
-                        <button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); editUser(${user.id})">
-                        <i class="bi bi-pencil"></i>
-                    </button>
-                        <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); deleteUser(${user.id})">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </td>
-            </tr>
-        `
-    })
-
+navRoles.onclick = () => {
+    switchView('roles')
 }
 
-const loadStats = async () => {
-
-    try {
-        const res = await fetch('/users/stats')
-        const stats = await res.json()
-
-        if (res.ok) {
-            document.getElementById('stat-total').innerText = stats.cant_total
-            document.getElementById('stat-activos').innerText = stats.cant_activos
-            document.getElementById('stat-inactivos').innerText = stats.cant_inactivos
-            document.getElementById('stat-roles').innerText = stats.cant_roles
-        }
-
-    } catch (error) {
-        console.error("Error cargando stats:", error)
-    }
-}
-
-const showToast = (message, type = "success") => {
-    Toastify({
-        text: message,
-        duration: 3000,
-        close: true,
-        gravity: "bottom", 
-        position: "right", 
-        stopOnFocus: true,
-        style: {
-            background: type === "success" ? "#198754" : "#dc3545",
-            borderRadius: "8px"
-        }
-    }).showToast()
-}
 
 const checkSession = async () => {
 
@@ -361,6 +60,71 @@ const checkSession = async () => {
         return null
     }
 
-}
+}    
 
 setInterval(checkSession, 60000)
+
+btnLogout.onclick = async () =>{
+
+    try {
+        const response = await fetch('/users/logout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+
+        if (response.ok) {
+            window.location.href = '/index.html?logout=success'
+        } else {
+            alert("Error al cerrar sesion")
+        }
+
+    } catch (error) {
+        console.error("Error en logout:", error)
+    }
+} 
+
+
+const loadStats = async () => {
+
+    try {
+        const res = await fetch('/users/stats')
+        const stats = await res.json()
+
+        if (res.ok) {
+            document.getElementById('stat-total').innerText = stats.cant_total
+            document.getElementById('stat-activos').innerText = stats.cant_activos
+            document.getElementById('stat-inactivos').innerText = stats.cant_inactivos
+            document.getElementById('stat-roles').innerText = stats.cant_roles
+        }
+
+    } catch (error) {
+        console.error("Error cargando stats:", error)
+    }
+}
+
+
+const showToast = (message, type = "success") => {
+    Toastify({
+        text: message,
+        duration: 3000,
+        close: true,
+        gravity: "bottom", 
+        position: "right", 
+        stopOnFocus: true,
+        style: {
+            background: type === "success" ? "#198754" : "#dc3545",
+            borderRadius: "8px"
+        }
+    }).showToast()
+}
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    checkSession()
+    loadStats()
+    loadUsers()
+})
+
+window.showToast = showToast;
+window.checkSession = checkSession;
+window.loadStats = loadStats;

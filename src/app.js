@@ -5,7 +5,8 @@ import dotenv from 'dotenv'
 import path from 'path';
 import session from 'express-session';
 import { fileURLToPath } from 'url';
-import { usersRouter } from "./routes/users.js";
+import { usersRouter } from "./routes/usersRouter.js";
+import { rolesRouter } from "./routes/rolesRouter.js";
 
 dotenv.config()
 const app = express()
@@ -43,3 +44,4 @@ app.listen(PORT, ()=>{
 })
 
 app.use("/users", usersRouter)
+app.use("/roles", rolesRouter)
