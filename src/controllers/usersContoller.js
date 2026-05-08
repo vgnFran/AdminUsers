@@ -61,11 +61,15 @@ export class UsersController{
         const { name, dni, email, rol, date, adress, cp, pass, confirmPass, obs, active } = req.body
 
         if(!name || !dni || !email || !rol || !pass) {
-            return res.status(404).json({ error: "Debe completar todos los campos requeridos." })
+            return res.status(400).json({ error: "Debe completar todos los campos requeridos." })
+        }
+
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            return res.status(400).json({ error: "El email no tiene un formato valido." })
         }
 
         if(pass.length < 8){
-            return res.status(404).json({ error: "La contraseña debe tener al menos 8 caracteres." })
+            return res.status(400).json({ error: "La contraseña debe tener al menos 8 caracteres." })
         }
 
         if (pass !== confirmPass) {
@@ -158,6 +162,20 @@ export class UsersController{
         const { name, dni, email, rol, date, adress, cp, pass, confirmPass, obs, active } = req.body
 
         try {
+
+            if(!name || !dni || !email || !rol) {
+                return res.status(400).json({ error: "Debe completar todos los campos requeridos." })
+            }
+
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                return res.status(400).json({ error: "El email no tiene un formato valido." })
+            }
+
+            const existUser = await UserModel.getOthersUseraByEmailOrDni(email, dni, id)
+
+            if (existUser) {
+                return res.status(409).json({ error: "El email o DNI ya se encuentra registrado." })
+            }
 
             let passwordHash = null
             

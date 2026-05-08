@@ -35,6 +35,18 @@ export class UserModel {
         return rows[0]
     }
 
+    static async getOthersUseraByEmailOrDni(email, dni, id){
+        const query = `
+            select id
+            from users
+            where (email = ? or dni = ?)
+            and id <> ?
+            limit 1
+        `
+        const [rows] = await pool.execute(query, [email, dni, id])
+        return rows[0]
+    }
+
     static async getAllUsers() {
         const query = `
             select u.id, u.nombre, u.email, u.dni, r.nombre as rol_nombre, u.activo, u.fecha_alta 
