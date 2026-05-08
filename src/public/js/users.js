@@ -8,7 +8,15 @@ const inputSearch = document.getElementById("userSearch")
 
 const modalUser= document.getElementById("modalUser")
 const modalUserBS = new bootstrap.Modal(modalUser)
-btnNewUser.onclick = () =>{
+
+btnNewUser.onclick = async () =>{
+    editMode = false
+    currentUser = 0
+    formUser.reset()
+    modalUser.querySelector(".modal-title").innerText = "Gestion de Usuario"
+    formUser.querySelector("#userPassword").required = true
+    formUser.querySelector("#confirmPassword").required = true
+    await loadRolesSelect()
     modalUserBS.show()
 }
 
@@ -87,6 +95,33 @@ const loadTableUsers = (users) => {
     })
 
 }
+
+const loadRolesSelect = async (currentRoleId = null) => {
+
+    const response = await fetch('/roles/all')
+    const roles = await response.json()
+    const select = document.getElementById("userRol")
+
+    select.innerHTML = '<option value="" selected disabled>Seleccionar</option>'
+
+    roles.forEach(rol => {
+        const isActive = rol.activo === 1
+        const isCurrentRole = currentRoleId && Number(rol.id) === Number(currentRoleId)
+
+        if (!isActive && !isCurrentRole) return
+
+        const option = document.createElement("option")
+        option.value = rol.id
+        option.textContent = isActive ? rol.nombre : `${rol.nombre} (inactivo)`
+
+        select.appendChild(option)
+    })
+
+    if (currentRoleId) {
+        select.value = currentRoleId
+    }
+}
+
 
 
 //Input para buscar usuarios con like
@@ -203,7 +238,9 @@ window.detailUser = async (id) => {
             document.getElementById('detailBirth').textContent = user.fecha_nacimiento ? new Date(user.fecha_nacimiento).toLocaleDateString() : "No registrada"
             document.getElementById('detailEmail').textContent = user.email
             document.getElementById('detailRol').textContent = user.rol_nombre
-            document.getElementById('detailStatus').textContent = user.activo === 1 ? 'Activo' : 'Inactivo'
+            const detailStatus = document.getElementById('detailStatus')
+            detailStatus.textContent = user.activo === 1 ? 'Activo' : 'Inactivo'
+            detailStatus.className = `badge ${user.activo === 1 ? 'bg-success' : 'bg-secondary'}`
             const domicilio = user.domicilio || "No registrado"
             const cp = user.codigo_postal || "No registrado"
             document.getElementById('detailLocation').textContent = `${domicilio} - CP: ${cp}`
@@ -229,6 +266,8 @@ window.editUser = async (id) => {
         const user = await response.json()
 
         if (response.ok) {
+
+            await loadRolesSelect(user.rol_id)
 
             formUser.querySelector("#userName").value = user.nombre
             formUser.querySelector("#userDni").value = user.dni

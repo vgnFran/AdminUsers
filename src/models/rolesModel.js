@@ -18,6 +18,13 @@ export class RolesModel {
         return rows
     }
 
+    static async getById(id) {
+        const query = 'select id, activo from roles where id = ? limit 1'
+        const [rows] = await pool.execute(query, [id])
+
+        return rows[0]
+    }
+
     static async newRol(name, desc, active) {
         const query = 'insert into roles (nombre, descripcion, activo) VALUES (?, ?, ?)'
         const [result] = await pool.execute(query, [name, desc, active])

@@ -194,9 +194,6 @@
                                 <label class="form-label">Rol</label>
                                 <select class="form-select" id="userRol" required>
                                     <option value="" selected disabled>Seleccionar</option>
-                                    <option value="1">Admin</option>
-                                    <option value="2">Operador</option>
-                                    <option value="3">Viewer</option>
                                 </select>
                             </div>
                         </div>
@@ -250,7 +247,67 @@
         </div>
     </div>
 
-    <!-- Modal eliminacion de usuario -->
+
+    <!-- Modal detalle de usuario -->
+    <div class="modal fade" id="modalDetail" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-person-vcard-fill me-2"></i> Detalle de Usuario
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="border rounded p-3 bg-light">
+                                <small class="text-muted d-block">Nombre completo</small>
+                                <h5 class="mb-0" id="detailName"></h5>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small mb-1">DNI</label>
+                            <div class="form-control bg-light" id="detailDni"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small mb-1">Fecha de nacimiento</label>
+                            <div class="form-control bg-light" id="detailBirth"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small mb-1">Email</label>
+                            <div class="form-control bg-light" id="detailEmail"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small mb-1">Rol</label>
+                            <div class="form-control bg-light">
+                                <span id="detailRol" class="badge bg-secondary"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small mb-1">Estado</label>
+                            <div class="form-control bg-light">
+                                <span id="detailStatus" class="badge"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small mb-1">Domicilio</label>
+                            <div class="form-control bg-light" id="detailLocation"></div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label text-muted small mb-1">Observaciones</label>
+                            <div class="form-control bg-light" id="detailObs" style="min-height: 90px;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <!-- Modal eliminacion (users y roles) -->
     <div class="modal fade" id="modalDelete" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -264,64 +321,6 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="button" class="btn btn-danger" id="btnModalDelete">Eliminar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal detalle de usuario -->
-    <div class="modal fade" id="modalDetail" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-white border-bottom px-4">
-                    <h6 class="modal-title text-uppercase fw-bold text-secondary" style="letter-spacing: 1px; font-size: 13px;"> Detalle de Usuario </h6>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body px-4 py-4">
-                    <div class="mb-5">
-                        <h2 class="fw-bold text-dark" id="detailName"></h2>
-                    </div>
-                    <div class="row mb-5">
-                        <div class="col-md-4">
-                            <small class="text-muted text-uppercase d-block mb-1 fw-bold" style="font-size: 11px;">Documento</small>
-                            <span class="text-dark border-start ps-2" id="detailDni"></span>
-                        </div>
-                        <div class="col-md-4">
-                            <small class="text-muted text-uppercase d-block mb-1 fw-bold" style="font-size: 11px;">Fecha de Nacimiento</small>
-                            <span class="text-dark border-start ps-2" id="detailBirth"></span>
-                        </div>
-                        <div class="col-md-4">
-                            <small class="text-muted text-uppercase d-block mb-1 fw-bold" style="font-size: 11px;">Email</small>
-                            <span class="text-dark border-start ps-2" id="detailEmail"></span>
-                        </div>
-                    </div>
-                    <div class="row mb-5">
-                        <div class="col-md-4">
-                            <small class="text-muted text-uppercase d-block mb-1 fw-bold" style="font-size: 11px;">Rol del Sistema</small>
-                            <div class="mt-1">
-                                <span id="detailRol" class="badge bg-light text-dark border fw-normal px-3 py-2" style="font-size: 13px;"></span>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <small class="text-muted text-uppercase d-block mb-1 fw-bold" style="font-size: 11px;">Estado de Cuenta</small>
-                            <div class="mt-1">
-                                <span id="detailStatus" class="badge bg-light text-dark border fw-normal px-3 py-2" style="font-size: 13px;"></span>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <small class="text-muted text-uppercase d-block mb-1 fw-bold" style="font-size: 11px;">Domicilio</small>
-                            <span class="text-dark border-start ps-2 d-block" id="detailLocation" style="font-size: 14px;"></span>
-                        </div>
-                    </div>
-                    <div class="mt-2">
-                        <small class="text-muted text-uppercase d-block mb-2 fw-bold" style="font-size: 11px;">Notas</small>
-                        <div class="bg-light p-3 border rounded-1">
-                            <p id="detailObs" class="mb-0 text-dark small" style="line-height: 1.6;"></p>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light border-top px-4 py-2">
-                    <button type="button" class="btn btn-secondary btn-sm px-4" data-bs-dismiss="modal">Cerrar</button>
                 </div>
             </div>
         </div>

@@ -1,5 +1,6 @@
-import { UserModel } from '../models/usersModel.js';
-import bcrypt from 'bcrypt';
+import { UserModel } from '../models/usersModel.js'
+import { RolesModel } from '../models/rolesModel.js'
+import bcrypt from 'bcrypt'
 
 export class UsersController{
 
@@ -80,6 +81,17 @@ export class UsersController{
                 })
             }
 
+            const selectedRole = await RolesModel.getById(rol)
+
+            if (!selectedRole) {
+                return res.status(400).json({ error: "El rol seleccionado no existe." })
+            }
+
+            if (!selectedRole.activo) {
+                return res.status(400).json({ error: "No se puede asignar un rol inactivo." })
+            }
+
+
             const passwordHash = await bcrypt.hash(pass, 10)
             const userData = {
                 name: name,
@@ -149,7 +161,7 @@ export class UsersController{
 
             let passwordHash = null
             
-            if (pass.trim() !== "") {
+            if (pass && pass.trim() !== "") {
 
                 if (pass !== confirmPass) {
                     return res.status(400).json({ error: "Las contraseñas no coinciden." })
@@ -161,6 +173,22 @@ export class UsersController{
 
                 passwordHash = await bcrypt.hash(pass, 10)
 
+            }
+
+            const selectedRole = await RolesModel.getById(rol)
+
+            if (!selectedRole) {
+                return res.status(400).json({ error: "El rol seleccionado no existe." })
+            }
+
+            const currentUser = await UserModel.getById(id)
+
+            if (!currentUser) {
+                return res.status(404).json({ error: "Usuario no encontrado" })
+            }
+
+            if (!selectedRole.activo && Number(currentUser.rol_id) !== Number(rol)) {
+                return res.status(400).json({ error: "No se puede asignar un rol inactivo." })
             }
 
             const userData = {
