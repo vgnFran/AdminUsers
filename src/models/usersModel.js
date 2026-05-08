@@ -4,7 +4,7 @@ export class UserModel {
 
     static async getById(id) {
         const query = `
-            select u.id, u.nombre, u.email, u.password_hash, u.dni, u.fecha_nacimiento, u.rol_id, u.domicilio, u.codigo_postal, u.observacion, u.activo, r.nombre as rol_nombre
+            select u.id, u.nombre, u.email, u.password_hash, u.dni, u.fecha_nacimiento, u.rol_id, u.domicilio, u.codigo_postal, u.observacion, u.activo, u.fecha_alta, r.nombre as rol_nombre
             from users u
             join roles r on u.rol_id = r.id 
             where u.id= ?
@@ -37,7 +37,7 @@ export class UserModel {
 
     static async getAllUsers() {
         const query = `
-            select u.id, u.nombre, u.email, u.dni, r.nombre as rol_nombre, u.activo 
+            select u.id, u.nombre, u.email, u.dni, r.nombre as rol_nombre, u.activo, u.fecha_alta 
             from users u 
             join roles r ON u.rol_id = r.id
         `
@@ -47,7 +47,7 @@ export class UserModel {
 
     static async getUserByFilter(filter) {
         const query = `
-            SELECT u.id, u.nombre, u.email, u.dni, r.nombre as rol_nombre, u.activo 
+            SELECT u.id, u.nombre, u.email, u.dni, r.nombre as rol_nombre, u.activo, u.fecha_alta 
             FROM users u 
             JOIN roles r ON u.rol_id = r.id
             WHERE u.nombre LIKE ? 

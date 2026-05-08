@@ -30,6 +30,12 @@ const modalDetailBS = new bootstrap.Modal(modalDetail)
 let editMode = false
 let currentUser = 0
 
+const formatDate = (date) => {
+    if (!date) return "No registrada"
+
+    return new Date(date).toLocaleDateString()
+}
+
 
 //Funcion para obtener los usuarios de la bd
 const loadUsers = async () => {
@@ -61,7 +67,7 @@ const loadTableUsers = (users) => {
     if (users.length == 0) {
         tableBody.innerHTML = `
             <tr>
-                <td colspan="6" class="text-center text-muted">No se encontraron resultados</td>
+                <td colspan="7" class="text-center text-muted">No se encontraron resultados</td>
             </tr>`
         return
     }
@@ -82,6 +88,7 @@ const loadTableUsers = (users) => {
                         ${user.activo ? 'Activo' : 'Inactivo'}
                     </span>
                 </td>
+                <td>${formatDate(user.fecha_alta)}</td>
                 <td class="text-end">
                         <button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); editUser(${user.id})">
                         <i class="bi bi-pencil"></i>
@@ -235,8 +242,9 @@ window.detailUser = async (id) => {
 
             document.getElementById('detailName').textContent = user.nombre
             document.getElementById('detailDni').textContent = user.dni 
-            document.getElementById('detailBirth').textContent = user.fecha_nacimiento ? new Date(user.fecha_nacimiento).toLocaleDateString() : "No registrada"
+            document.getElementById('detailBirth').textContent = formatDate(user.fecha_nacimiento)
             document.getElementById('detailEmail').textContent = user.email
+            document.getElementById('detailCreatedAt').textContent = formatDate(user.fecha_alta)
             document.getElementById('detailRol').textContent = user.rol_nombre
             const detailStatus = document.getElementById('detailStatus')
             detailStatus.textContent = user.activo === 1 ? 'Activo' : 'Inactivo'
